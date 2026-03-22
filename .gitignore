@@ -1,0 +1,10 @@
+ml_model/
+*.pkl
+*.pth
+*.png
+
+data/
+*.csv
+
+frontend/node_modules
+backend/node_modules
