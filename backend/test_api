@@ -1,0 +1,148 @@
+"""
+API Test Script — run this while the backend is running.
+Usage:
+  1. Start backend:  uvicorn main:app --reload --port 8000
+  2. In another terminal: python backend/test_api.py
+"""
+import requests, json, os, sys
+
+BASE = "http://localhost:8000/api"
+PASS = 0
+FAIL = 0
+
+def check(name, resp, expected_keys):
+    global PASS, FAIL
+    if resp.status_code == 200:
+        data = resp.json()
+        missing = [k for k in expected_keys if k not in data]
+        if missing:
+            print(f"  FAIL {name} — missing keys: {missing}")
+            FAIL += 1
+        else:
+            vals = {k: data[k] for k in expected_keys}
+            print(f"  PASS {name}")
+            for k, v in vals.items():
+                print(f"       {k}: {v}")
+            PASS += 1
+    else:
+        print(f"  FAIL {name} — HTTP {resp.status_code}: {resp.text[:200]}")
+        FAIL += 1
+
+print("=" * 55)
+print("  AI FARM INTELLIGENCE SYSTEM — API TESTS")
+print("=" * 55)
+
+# ── 1. Health check ──────────────────────────────────────────
+print("\n[1] Health check")
+try:
+    r = requests.get("http://localhost:8000/health", timeout=5)
+    check("GET /health", r, ["status"])
+except Exception as e:
+    print(f"  FAIL — Cannot connect to backend: {e}")
+    print("  Make sure backend is running: uvicorn main:app --reload --port 8000")
+    sys.exit(1)
+
+# ── 2. Crop recommendation ───────────────────────────────────
+print("\n[2] Crop recommendation")
+r = requests.post(f"{BASE}/predict_crop", json={
+    "nitrogen": 90, "phosphorus": 42, "potassium": 43,
+    "temperature": 20.8, "humidity": 82.0, "ph": 6.5, "rainfall": 202.9
+}, timeout=15)
+check("POST /predict_crop (rice conditions)", r,
+      ["recommended_crop", "confidence", "top_3"])
+
+# ── 3. Yield prediction ──────────────────────────────────────
+print("\n[3] Yield prediction")
+
+# First get supported crops
+r = requests.get(f"{BASE}/supported_crops", timeout=10)
+check("GET /supported_crops", r, ["crops"])
+if r.status_code == 200:
+    crops = r.json()["crops"]
+    print(f"       Available crops: {crops}")
+    test_crop = crops[0]   # use first available crop
+else:
+    test_crop = "Maize"
+
+r = requests.post(f"{BASE}/predict_yield", json={
+    "crop": test_crop, "year": 2010,
+    "rainfall": 800.0, "temperature": 22.0, "pesticide_use": 10.0
+}, timeout=15)
+check(f"POST /predict_yield ({test_crop})", r,
+      ["predicted_yield", "unit", "crop"])
+
+# ── 4. Explain prediction (crop) ────────────────────────────
+print("\n[4] Explainable AI — crop")
+r = requests.post(f"{BASE}/explain_prediction", json={
+    "model_type": "crop",
+    "features": {
+        "nitrogen": 90, "phosphorus": 42, "potassium": 43,
+        "temperature": 20.8, "humidity": 82.0, "ph": 6.5, "rainfall": 202.9
+    }
+}, timeout=30)
+check("POST /explain_prediction (crop)", r,
+      ["prediction", "contributions", "summary"])
+if r.status_code == 200:
+    print(f"       Summary: {r.json()['summary']}")
+
+# ── 5. Explain prediction (yield) ───────────────────────────
+print("\n[5] Explainable AI — yield")
+r = requests.post(f"{BASE}/explain_prediction", json={
+    "model_type": "yield",
+    "features": {
+        "crop": test_crop, "year": 2010,
+        "rainfall": 800.0, "temperature": 22.0, "pesticide_use": 10.0
+    }
+}, timeout=30)
+check("POST /explain_prediction (yield)", r,
+      ["prediction", "contributions", "summary"])
+if r.status_code == 200:
+    print(f"       Summary: {r.json()['summary']}")
+
+# ── 6. Disease detection ─────────────────────────────────────
+print("\n[6] Disease detection")
+model_path = os.path.join("ml_models", "disease_model.pth")
+if os.path.exists(model_path):
+    # Create a tiny dummy 224x224 image to test the endpoint
+    try:
+        from PIL import Image
+        import io
+        img = Image.new("RGB", (224, 224), color=(100, 150, 80))
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        buf.seek(0)
+        r = requests.post(f"{BASE}/detect_disease",
+                          files={"file": ("test_leaf.jpg", buf, "image/jpeg")},
+                          timeout=30)
+        check("POST /detect_disease", r, ["disease", "confidence", "top_3"])
+    except ImportError:
+        print("  SKIP — Pillow not installed (pip install Pillow)")
+else:
+    print(f"  SKIP — disease_model.pth not found at {model_path}")
+    print("         Complete Colab training first, then place .pth in ml_models/")
+
+# ── 7. Weather ────────────────────────────────────────────────
+print("\n[7] Weather advisory")
+api_key = os.getenv("OPENWEATHER_API_KEY", "")
+if api_key:
+    r = requests.get(f"{BASE}/weather", params={"city": "Pune"}, timeout=10)
+    check("GET /weather?city=Pune", r,
+          ["location", "temperature", "humidity", "advisories"])
+    if r.status_code == 200:
+        data = r.json()
+        print(f"       Location : {data['location']}")
+        print(f"       Temp     : {data['temperature']}°C")
+        print(f"       Advisory : {data['advisories'][0]}")
+else:
+    print("  SKIP — OPENWEATHER_API_KEY not set in .env")
+    print("         Add it to backend/.env and restart the server")
+
+# ── Summary ───────────────────────────────────────────────────
+print("\n" + "=" * 55)
+total = PASS + FAIL
+print(f"  Results: {PASS}/{total} passed  |  {FAIL} failed")
+print("=" * 55)
+if FAIL == 0:
+    print("  All tests passed. Ready for Day 4 — Frontend!")
+else:
+    print("  Fix the failing endpoints before moving to Day 4.")

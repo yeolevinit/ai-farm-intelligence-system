@@ -10,8 +10,8 @@ import json
 
 router = APIRouter()
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "ml_models", "disease_model.pth")
-CLASSES_PATH = os.path.join(os.path.dirname(__file__), "..", "ml_models", "disease_classes.json")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "ml_models", "disease_model.pth")
+CLASSES_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "ml_models", "disease_classes.json")
 
 _model = None
 _classes = None
