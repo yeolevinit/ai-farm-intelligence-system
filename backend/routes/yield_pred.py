@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 import joblib
 import numpy as np
+import pandas as pd
 import os
 
 router = APIRouter()
@@ -30,15 +31,16 @@ def get_model():
     return _model, _encoder, _features
 
 
-def build_features(crop_encoded, year, rainfall, pesticide_use, temperature) -> np.ndarray:
-    """Build the exact same 8-feature vector used during training."""
+def build_features(crop_encoded, year, rainfall, pesticide_use, temperature) -> pd.DataFrame:
+    """Returns DataFrame with named columns — suppresses sklearn feature name warning."""
     rain_temp_ratio    = rainfall / (temperature + 1)
     pesticide_per_rain = pesticide_use / (rainfall + 1)
     year_norm          = (year - _year_min) / (_year_max - _year_min + 1)
-    return np.array([[
+    return pd.DataFrame([[
         crop_encoded, year, rainfall, pesticide_use, temperature,
         rain_temp_ratio, pesticide_per_rain, year_norm
-    ]])
+    ]], columns=['crop_encoded','year','rainfall','pesticide_use','temperature',
+                 'rain_temp_ratio','pesticide_per_rain','year_norm'])
 
 
 class YieldInput(BaseModel):

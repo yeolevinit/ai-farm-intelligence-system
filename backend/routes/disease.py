@@ -37,7 +37,7 @@ def get_model():
         num_classes = len(_classes)
 
         # Use ResNet18 — lightweight and accurate enough for PlantVillage
-        model = models.resnet18(pretrained=False)
+        model = models.resnet18(weights=None)  # weights=None is the modern API (pretrained= is deprecated)
         model.fc = nn.Linear(model.fc.in_features, num_classes)
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

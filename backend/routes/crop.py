@@ -26,13 +26,16 @@ def get_model():
     return _model, _features
 
 
-def build_features(n, p, k, temp, humidity, ph, rainfall) -> np.ndarray:
-    """Build the exact same feature vector used during training (7 base + 3 engineered)."""
+def build_features(n, p, k, temp, humidity, ph, rainfall) -> pd.DataFrame:
+    """Returns DataFrame with named columns — suppresses sklearn feature name warning."""
     npk_ratio     = n / (p + k + 1)
     temp_humidity = temp * humidity / 100
     water_need    = rainfall * humidity / 100
-    return np.array([[n, p, k, temp, humidity, ph, rainfall,
-                      npk_ratio, temp_humidity, water_need]])
+    return pd.DataFrame([[n, p, k, temp, humidity, ph, rainfall,
+                          npk_ratio, temp_humidity, water_need]],
+                        columns=['nitrogen','phosphorus','potassium','temperature',
+                                 'humidity','ph','rainfall',
+                                 'npk_ratio','temp_humidity','water_need'])
 
 
 class CropInput(BaseModel):
