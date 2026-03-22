@@ -45,7 +45,10 @@ export default function Dashboard() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
   useEffect(() => {
-    api.get('/health').then(() => setApiOk(true)).catch(() => setApiOk(false));
+    // /health is at root, not under /api prefix
+    fetch('http://localhost:8000/health')
+      .then(r => r.ok ? setApiOk(true) : setApiOk(false))
+      .catch(() => setApiOk(false));
   }, []);
 
   return (

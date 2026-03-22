@@ -27,7 +27,11 @@ def get_model():
     global _model, _classes
     if _model is None:
         if not os.path.exists(MODEL_PATH):
-            raise HTTPException(status_code=503, detail="Disease model not trained yet. Run ml_training/train_disease_model.py first.")
+            raise HTTPException(status_code=503,
+                detail="disease_model.pth not found in ml_models/. Complete Colab training and copy the file there.")
+        if not os.path.exists(CLASSES_PATH):
+            raise HTTPException(status_code=503,
+                detail="disease_classes.json not found in ml_models/. Download it from Colab along with disease_model.pth.")
         with open(CLASSES_PATH) as f:
             _classes = json.load(f)
         num_classes = len(_classes)

@@ -7,6 +7,7 @@ import YieldPrediction from './pages/YieldPrediction';
 import DiseaseDetection from './pages/DiseaseDetection';
 import WeatherAdvisory from './pages/WeatherAdvisory';
 import Dashboard from './pages/Dashboard';
+import Explainability from './pages/Explainability';
 import './styles/App.css';
 
 const NAV_LINKS = [
@@ -15,6 +16,7 @@ const NAV_LINKS = [
   { to: '/yield', label: 'Yield' },
   { to: '/disease', label: 'Disease' },
   { to: '/weather', label: 'Weather' },
+  { to: '/explain', label: 'Explain AI' },
 ];
 
 export default function App() {
@@ -32,7 +34,6 @@ export default function App() {
   return (
     <Router>
       <div className="app">
-        {/* ── Navbar ── */}
         <nav className="navbar">
           <NavLink to="/" className="nav-brand" end>
             <Sprout size={18} strokeWidth={2.5} />
@@ -49,15 +50,11 @@ export default function App() {
               onClick={() => setDark(d => !d)}
               title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {dark
-                ? <Sun size={15} strokeWidth={2} />
-                : <Moon size={15} strokeWidth={2} />
-              }
+              {dark ? <Sun size={15} strokeWidth={2} /> : <Moon size={15} strokeWidth={2} />}
             </button>
           </div>
         </nav>
 
-        {/* ── Page content ── */}
         <main className="main-content">
           <AnimatePresence mode="wait">
             <Routes>
@@ -66,6 +63,7 @@ export default function App() {
               <Route path="/yield" element={<PageWrap><YieldPrediction /></PageWrap>} />
               <Route path="/disease" element={<PageWrap><DiseaseDetection /></PageWrap>} />
               <Route path="/weather" element={<PageWrap><WeatherAdvisory /></PageWrap>} />
+              <Route path="/explain" element={<PageWrap><Explainability /></PageWrap>} />
             </Routes>
           </AnimatePresence>
         </main>
