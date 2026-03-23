@@ -1,10 +1,7 @@
-ml_model/
-*.pkl
-*.pth
-*.png
+ml_models/yield_rf_model.pkl
 
-data/
-*.csv
+
+
 
 frontend/node_modules
 backend/node_modules
