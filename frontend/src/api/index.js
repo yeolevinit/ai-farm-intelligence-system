@@ -1,16 +1,17 @@
 import axios from 'axios';
 
+// In production (Vercel), use the Render backend URL from environment variable
+// In development (localhost), use the proxy defined in package.json
 const BASE_URL = process.env.REACT_APP_API_URL
   ? `${process.env.REACT_APP_API_URL}/api`
   : '/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 30000,
+  timeout: 60000, // 60s timeout to handle Render cold start wake-up
 });
 
 export const predictCrop = (data) => api.post('/predict_crop', data);
-
 export const predictYield = (data) => api.post('/predict_yield', data);
 
 export const detectDisease = (imageFile) => {
@@ -22,7 +23,6 @@ export const detectDisease = (imageFile) => {
 };
 
 export const getWeather = (city) => api.get('/weather', { params: { city } });
-
 export const explainPrediction = (modelType, features) =>
   api.post('/explain_prediction', { model_type: modelType, features });
 
