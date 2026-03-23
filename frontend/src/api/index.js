@@ -1,14 +1,17 @@
 import axios from 'axios';
 
-// In production (Vercel), use the Render backend URL from environment variable
-// In development (localhost), use the proxy defined in package.json
+// Production backend URL - hardcoded as reliable fallback
+const RENDER_URL = 'https://ai-farm-backend-n8gm.onrender.com';
+
 const BASE_URL = process.env.REACT_APP_API_URL
   ? `${process.env.REACT_APP_API_URL}/api`
-  : '/api';
+  : window.location.hostname === 'localhost'
+    ? '/api'
+    : `${RENDER_URL}/api`;
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 60000, // 60s timeout to handle Render cold start wake-up
+  timeout: 60000,
 });
 
 export const predictCrop = (data) => api.post('/predict_crop', data);

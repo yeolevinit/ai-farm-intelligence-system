@@ -182,7 +182,9 @@ export default function Dashboard() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
   useEffect(() => {
-    const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+    const RENDER_URL = 'https://ai-farm-backend-n8gm.onrender.com';
+    const apiBase = process.env.REACT_APP_API_URL
+      || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : RENDER_URL);
     fetch(`${apiBase}/health`)
       .then(r => r.ok ? setApiOk(true) : setApiOk(false))
       .catch(() => setApiOk(false));
