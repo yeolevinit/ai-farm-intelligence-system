@@ -13,7 +13,7 @@
 
 **5 AI models · 99.55% crop accuracy · R² 0.96 yield model · 38 diseases detected**
 
-[Live Demo](#) · [API Docs](#api-endpoints) · [Quick Start](#quick-start)
+[Live Demo](https://ai-farm-frontend.vercel.app/) · [API Docs](https://ai-farm-backend-n8gm.onrender.com/docs) · [Quick Start](#quick-start)
 
 </div>
 
