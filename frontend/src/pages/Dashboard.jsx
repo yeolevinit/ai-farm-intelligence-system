@@ -182,7 +182,7 @@ export default function Dashboard() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
   useEffect(() => {
-    fetch('http://localhost:8000/health')
+    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/health`)
       .then(r => r.ok ? setApiOk(true) : setApiOk(false))
       .catch(() => setApiOk(false));
   }, []);
