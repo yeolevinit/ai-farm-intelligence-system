@@ -35,15 +35,25 @@ app = FastAPI(
 )
 
 # Allow both local dev and deployed frontend
+FRONTEND_URL = os.getenv("FRONTEND_URL", "")
+
 origins = [
+    "http://localhost:3000",
     "http://localhost:3001",
+    "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
-    os.getenv("FRONTEND_URL", ""),   # set this on Render to your Vercel URL
 ]
+
+# Add Vercel URL and any preview URLs
+if FRONTEND_URL:
+    origins.append(FRONTEND_URL)
+    # Also allow Vercel preview deployments (vercel.app domain)
+    origins.append("https://ai-farm-frontend.vercel.app")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[o for o in origins if o],
+    allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",  # allow all Vercel preview URLs
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
